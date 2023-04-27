@@ -33,6 +33,12 @@ modules:
     name: ■ Taint と Toleration
   windows-containers:
     name: ■ Windows コンテナ
+  acs-vulnerability:
+    name: ■ ACSによる脆弱性のスキャン
+  acs-devsecops:
+    name: ■ ACSによるDevSecOps
+  acm-multicluster:
+    name: ■ ACMによるマルチクラスター管理
 config:
     template_engine: liquid.js  
     vars:
