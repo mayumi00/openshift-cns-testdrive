@@ -1,4 +1,4 @@
-name: Container and Cloud Native Roadshow 2022
+name: Modern App Dev Roadshow - Ops Track
 
 modules:
   activate:
@@ -18,5 +18,8 @@ modules:
   - taints-and-tolerations
   - windows-containers
   - odf4
+  - acs-vulnerability
+  - acs-devsecops
+  - acm-multicluster
 
   
