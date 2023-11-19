@@ -1,18 +1,28 @@
 = Advanced Cluster Management for Kubernetes - RHACM
 
+ACMのコンソールは、ACM4.7以降ではOpenShiftコンソールと統合されています。
+
+以下のコンソールをご覧ください：
+
+{{ MASTER_URL }}
+
+OpenShift Webコンソールの左上で、`Local-cluster`に移動し、`All Clusters`を選択すると、ACMコンソールが表示されます。（Managing cluster just got easierというポップアップが表示された場合は、そのポップアップは閉じてください）
+
+image::images/acm-0-0.png[]
+image::images/acm-0-1.png[]
+
 == クラスターとクラスターライフサイクルの操作
 
-クラスターのライフサイクル管理は、マルチクラウド環境におけるクラスターの作成、アップグレード、破壊とインポートを高いレベルで行うものです。
+高レベルのクラスタ・ライフサイクル管理とは、マルチクラウド環境におけるクラスタの作成、アップグレード、破棄、インポートのことです。
 
-本ワークショップ用のガイダンスページで、*ACM HubのURL*、*ユーザー名とパスワード*、*AWSの認証情報* 、*Access Key ID*  、*Secret Access Key ID*、*Base DNS Domain* を確認しておきます。
+既存のOpenShiftクラスタをACMの管理対象としてインポートすることや、新規にOpenShiftクラスターを作成することが可能です。このセクションでは、新規にAWS上に通常のクラスタとシングルノードクラスタを作成します。
 
-*ACM HubのURL* から *ユーザー名とパスワード* を使用してACMにログインした後、*Credentials menu* に移動し、*Add Credentials* を選択します。
-
-image::images/acm-login.png[]
-
-image::images/acm-add-credential.png[]
 
 === 接続のための詳細情報の作成
+
+ACMコンソールで、*Credentials menu* に移動し、*Add Credentials* を選択します。
+
+image::images/acm-add-credential.png[]
 
 * Cloud Provider Credentials: *Amazon Web Services* を選びます。
 
@@ -46,20 +56,27 @@ Proxyを設定する必要はないので、この項目は何も設定しませ
 
 image::images/acm-1-4.png[]
 
-https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com] にログインして pull secretを取得します。RH loginが必要になります。 
+ 
 
-*↓以下の画面は、ACMコンソールではなく、 https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com] の画面です。*
+
+|===
+*NOTE* *↓↓↓以下の画面は、ACMコンソールではなく、 https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com] の画面です。*
+|===
+
+https://cloud.redhat.com/openshift/install/pull-secret[cloud.redhat.com] にログインして pull secretを取得します。RH loginが必要になります。
 
 image::images/acm-pullsecret.png[]
 
+
+次の項目をテキストボックスに入力しましす
+
 * Red Hat OpenShift pull secret: 取得したpull secret
 
-* SSH private and public keys: 既存のキーペア　または　新規に生成したキーペア
+* SSH private and public keys: 既存のキーペア または 新規に生成したキーペア（bastionサーバの/home/demo-user/.sshディレクトリ内にxxxxxxxx.pem  xxxxxxxx.pubがあるので利用可能です）
 
 新しいキーペアの作成については、次のドキュメントを参照して
 https://docs.openshift.com/container-platform/4.9/installing/installing_aws/installing-aws-default.html#ssh-agent-using_installing-aws-default[新しいsshキーを生成]します。
 
-> これらのキーを取得するには、*console.redhat.com* へのアクセスが必要な場合があることに注意してください。
 
 * NEXTをクリックします。
 
@@ -85,24 +102,26 @@ image::images/acm-2-1.png[]
 
 image::images/acm-2-2.png[]
 
+* *Control plane type* の選択画面で *Standalone* を選択します。
+
+image::images/acm-2-2-2.png[]
+
 
 * *Infrastructure provider credential* は先程作成した *aws* を選択します。
 * NEXTをクリックします
 
-image::images/acm-2-1-1.png[]
-
 * *cluster name* に名前を入力します。名前は適当でかまいません。
 * *Cluster set* は空にしておきます。
-* *Release Image* を選択します。 今回は「4.10.60」を選択してください。
 
 image::images/acm-2-3.png[]
 
+* *Release Image* を選択します。 今回は「4.12.42」を選択してください。
 * *environment=prod* ラベルを付与します。
 * NEXTをクリックします
 
 image::images/acm-2-4.png[]
 
-リージョンを *下表を参照* して変更します。今回は *ap-northeast-2* を選択してください。
+Reagionを *下表を参照* して変更します。今回は *ap-northeast-2* を選択してください。
 
 |===
 |ロケーション | 選択するAWS Region
@@ -125,58 +144,55 @@ _このプロセスは、本コース受講時のAWSのトラフィックに応�
 
 メインクラスタのプロビジョニングを待つ間に、シングルノードクラスタのプロビジョニングを進めてみましょう。この演習では、テスト用のクラスタを構築する際の時間とリソースを節約するために、シングルノードクラスタを作成する方法を紹介します（OCP 4.8 以上が必要です）。
 
-*Please NOTE：* SNOクラスターはベアメタルのみサポートし、パブリッククラウドは現在サポートされていません。以下の例では、機能を紹介するためにパブリッククラウドを活用しています。
-
+|===
+*NOTE:* SNOクラスターはベアメタルのみサポートし、パブリッククラウドは現在サポートされていません。以下の例では、機能を紹介するためにパブリッククラウドを活用しています。
+|===
 「AWSに新しいOpenShiftクラスターを作成する。」と同様にAWS上にクラスターを作成します。
 
 * メニューから *Infrastructure → Clusters* を選びます。
 * *Create Cluster* をクリックします。
 * *Amazon Web services* を選択します。
+* *Control plane type* の選択画面で *Standalone* を選択します。
 * *Infrastructure provider credential* は先程作成した *aws* を選択します。
 * NEXTをクリックします
 
 * *cluster name* に名前を入力します。名前は適当でかまいません。
 * *Cluster set* は空にしておきます。
-* *Release Image* を選択します。 今回は「4.10.60」を選択してください。
+* *Release Image* を選択します。 今回は「4.12.42」を選択してください。
+* *environment=qa* ラベルを付与します。
+
+* NEXTをクリックします
 
 image::images/acm-3-1.png[]
 
-* *environment=qa* ラベルを付与します。
-* NEXTをクリックします
-
-image::images/acm-3-2.png[]
-
-リージョンを *下表を参照* して変更します。今回は *ap-northeast-2* を選択してください。
+リージョンを *下表を参照* して変更します。今回は *ap-southeast-2* を選択してください。
 
 |===
 |ロケーション | 選択するAWS Region
 |*NORTH AMERICA*|*us-west-1* または *us-west-2*
 
 |*EUROPE / EMEA*|*eu-west-2* または *eu-west-3*
-|*ASIA PACIFIC*|*ap-southeast-2* または *ap-northeast-2* または *ap-east-1*
+|*ASIA PACIFIC*|*ap-southeast-2* または *ap-southeast-2* または *ap-east-1*
 |===
 
-
+image::images/acm-3-2.png[]
 
 * *Worker Pools* を展開し、Worker Node Countを 0 に変更します。
 
 image::images/acm-3-2-1.png[]
 
-image::images/acm-3-2-2.png[]
 
-* *7 - Review* をクリックし、レビューする *前に*、画面上部の *YAML.* をONにします。
-
-image::images/acm-3-3.png[]
+* *7 - Review* をクリックし、作成する *前に*、画面上部の *YAML.* をONにします。
 
 image::images/acm-3-4.png[]
 
-* YAMLウィンドウペインの *install-config* をクリックし、マスターレプリカの数を 1 に変更します（おそらく 3 になっています）。 ワーカーレプリカが 0 であることをダブルチェックします。
+* YAMLウィンドウペインの *install-config* をクリックし、マスターレプリカの数を 1 に変更します（おそらく 3 になっています）。 また、ワーカーレプリカが 0 であることをダブルチェックします。
 
 image::images/acm-3-5.png[]
 
 image::images/acm-3-6.png[]
 
-* YAMLウィンドウペインで *cluster* をクリックし、タイプ *kind: kind：MachinePool* オブジェクトを定義しているセクションを見つけます。*MachinePool* セクションの末尾に以下の行を追加します。
+* YAMLウィンドウペインで *cluster* をクリックし、タイプ *kind:MachinePool* オブジェクトを定義しているセクションを見つけます。*MachinePool* セクションの末尾に以下の行を追加します。
 
 ----
   skipMachinePools: true
@@ -185,13 +201,12 @@ image::images/acm-3-6.png[]
 
 image::images/acm-3-7.png[]
 
-image::images/acm-3-8.png[]
 
 * *Create* をクリックすると、シングルノードクラスターの作成が実行されます。
 
 _このプロセスは、本コース受講時のAWSのトラフィックに応じて、約10～20分かかります。失敗がないか必ずモニタし、必要に応じて対処してください_。
 
-== Red Hat Advanced Cluster Management For Kubernetesによるアプリケーションの作成と管理
+== アプリケーションの作成と管理
 
 前のラボでは、RHACM の Cluster Lifecycle 機能を学習しました。これにより、新しい OpenShift® クラスターを作成し、アプリケーションのデプロイに使用することができました。
 
@@ -258,7 +273,7 @@ image::images/acm-4-3.png[]
 
 image::images/acm-4-4.png[]
 
-* *Deploy application resources only on clusters matching specified labels* が選択されていることを確認し、次の情報を入力します。
+* *Deploy application resources on clusters with all specified labels* が選択されていることを確認し、次の情報を入力します。
 ** *Label*: `environment`
 ** *Value*: `dev`
 
@@ -283,19 +298,19 @@ image::images/acm-4-9.png[]
 
 編集して、ラベルを `environment=prod` に変えてみてください。 アプリケーションはどうなりますか？
 
-これで *Application Lifecycle functionality in RHACM* の概要は完了です。
+これで *アプリケーションの作成と管理* の概要は完了です。
 
 RHACMを使用してターゲットクラスタにアプリケーションを正常にデプロイしました。このアプローチでは、アプリケーションを定義するすべてのマニフェストが格納された Git リポジトリを活用しました。RHACMはこれらのマニフェストを受け取り、それらをdeployableとして使用し、ターゲットクラスタにデプロイすることができました。
 
-また、ラベルの力を活用し、インポートしたクラスタにアプリケーションをデプロイすることもできます。ぜひ、ラベルで遊んでみて、このアプリケーションをローカル・クラスターにデプロイしてみてください。また、必要に応じて、他のクラスタやアプリケーションを作成することもできます。
+また、ラベルの力を活用し、インポートしたクラスタにアプリケーションをデプロイすることもできます。ぜひ、ラベルで遊んでみて、このアプリケーションをローカルクラスタ以外にもデプロイしてみてください。また、必要に応じて、他のクラスタやアプリケーションを作成することもできます。
 
 == Governance, Risk, and Compliance（セキュリティとコンプライアンスのユースケース）
 
 === ACMでポリシーを作成する
 
-この時点で、RHACM の Cluster Lifecycle と Application Lifecycle 機能の概要ラボを終了しています。クラスターライフサイクルラボでは、新しいクラスターのデプロイと既存のクラスターのインポートの両方を含め、RHACMがKubernetesクラスターのライフサイクルを管理するのに役立つ方法を学びました。そのラボでは、新しいクラスタを作成し、RHACMインスタンスを使用してそれらを管理しました。
+この時点で、RHACMのクラスターライフサイクルとアプリケーションライフサイクル機能のラボを終了しています。クラスターライフサイクルラボでは、新しいクラスターのデプロイを行いRHACMがKubernetesクラスターのライフサイクルを管理するのに役立つ方法を学びました。
 
-アプリケーション・ライフサイクル・ラボでは、RHACM の機能を引き続き探索し、アプリケーションの展開と構成方法を学びました。アプリケーションのデプロイ先として、最初のワークショップモジュールで追加したクラスタを使用しました。
+アプリケーションライフサイクルラボでは、RHACMの機能を引き続き探索し、アプリケーションの展開と構成方法を学びました。アプリケーションのデプロイ先として、ローカルクラスタを使用しました。
 
 クラスタとデプロイされたアプリケーションを手に入れたら、それらが元の構成からドリフトしないことを確認する必要があります。このようなドリフトは、良心的で善良な修正や変更だけでなく、気づかないかもしれないが重大な問題を引き起こす悪意のある活動からも起こりうるため、深刻な問題です。これを解決するためにRHACMが提供するのが、Governance, Risk, and Compliance、つまりGRCの機能です。
 
@@ -327,7 +342,11 @@ RHACMを使用してターゲットクラスタにアプリケーションを正
 |===
 
 
-これは複雑なトピックであり、このコースは概要を提供するに過ぎません。これらのポリシーコントローラの詳細については https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.5/html-single/governance/index#governanc[GRC製品ドキュメント] を参照してください。
+これは複雑なトピックであり、このコースは概要を提供するに過ぎません。これらのポリシーコントローラの詳細については https://access.redhat.com/documentation/ja-jp/red_hat_advanced_cluster_management_for_kubernetes/2.7/html-single/governance/index#governance[GRC製品ドキュメント] を参照してください。
+
+==== ETCD Encryption Policyの作成と適用
+
+デフォルトで、etcdデータは暗号化されません。クラスターの etcd 暗号化を有効にして、データセキュリティーのレイヤーを追加で提供することができます。
 
 * *Governance* 画面に移動し、*create policy* をクリックします。
 
@@ -335,7 +354,7 @@ image::images/acm-5-1.png[]
 
 image::images/acm-5-2.png[]
 
-* GitHubのページで、すべてのポリシーを含む https://github.com/stolostron/policy-collection/tree/main/stable/CM-Configuration-Management に移動し、 https://github.com/stolostron/policy-collection/blob/main/stable/SC-System-and-Communications-Protection/policy-etcdencryption.yaml[policy-etcdencryption.yaml] を選択します。
+* GitHubのページで、すべてのポリシーを含む https://github.com/stolostron/policy-collection/tree/main/stable/CM-Configuration-Management[GitHub Repo] に移動し https://github.com/stolostron/policy-collection/blob/main/stable/SC-System-and-Communications-Protection/policy-etcdencryption.yaml[policy-etcdencryption.yaml] を選択します。
 
 * *policy-etcdencryption.yaml* のページで *RAW* ボタンをクリックします。
 
@@ -344,6 +363,86 @@ image::images/acm-5-3.png[]
 * RAW YAMLをコピーします。
 
 * *Create Policy* の画面で、*YAML* を有効にします。GitHub Repoからコピーした *RAW YAML* を貼り付けます。
+
+貼り付ける内容は下記のような内容です。
+```
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-etcdencryption
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: SC System and Communications Protection
+    policy.open-cluster-management.io/controls: SC-28 Protection Of Information At Rest
+spec:
+  remediationAction: inform
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: enable-etcd-encryption
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: config.openshift.io/v1
+                kind: APIServer
+                metadata:
+                  name: cluster
+                spec:
+                  encryption:
+                    type: aescbc
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: enable-etcd-encryption-status-kubeapi
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operator.openshift.io/v1
+                kind: KubeAPIServer
+                metadata:
+                  name: cluster
+                status:
+                  conditions:
+                    - message: 'All resources encrypted: secrets, configmaps'
+                      reason: EncryptionCompleted
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-policy-etcdencryption
+placementRef:
+  name: placement-policy-etcdencryption
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: policy-etcdencryption
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: placement-policy-etcdencryption
+spec:
+  clusterConditions:
+  - status: "True"
+    type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: environment, operator: In, values: ["dev"]}
+```
+
+Namespaceには *default* と入力します。ポリシーはのRemedationは *Inform* を選択します。また、*Label* の項目で、*Values* が*dev* （つまりLocalクラスターを指定している）であることを確認します。
 
 * *Namespace*: `default`
 
@@ -369,11 +468,11 @@ image::images/acm-5-9.png[]
 
 image::images/acm-5-10.png[]
 
-２つの違反が検知されますが、このポリシーは、Inform（情報提供）のみで作成されているため、違反の修正はできません。
+ポリシー違反が検知されますが、Inform（情報提供）のみで作成されているため、違反の修正はできません。
 
 続いて、違反の修正を行ってみましょう。Remediationを変更します。
 
-* ポリシーの上部で、*Actions → Edit Policy* をクリックします
+* ポリシー詳細の右上にあるメニューで、*Actions → Edit Policy* をクリックします
 
 image::images/acm-5-11.png[]
 
@@ -381,14 +480,12 @@ image::images/acm-5-11.png[]
 
 image::images/acm-5-12.png[]
 
-* *ステップ5* を選択し Remediationが *Enforce* に設定されているか確認します。
-
-* *Submit* をクリックします。
+* NEXTをクリックして、*ステップ5* でRemediationが *Enforce* に設定されているか確認し *Submit* をクリックします。
 
 image::images/acm-5-13.png[]
 
 SubmitをクリックするとPolicyが変更され、スキャンが始まります。
-結果画面に移動し、修復が完了するのを待ちます。片方の違反はすぐに修正されます。もう片方は修正に時間がかかります。
+結果画面に移動し、修復が完了するのを待ちます。（修復には30分程度時間を要します）
 
 image::images/acm-5-14.png[]
 
@@ -396,6 +493,7 @@ image::images/acm-5-14.png[]
 
 image::images/acm-5-15.png[]
 
-image::images/acm-5-16.png[]
 
 これで、クラスタをスキャンするためのポリシーが作成できました。他のポリシーを試してみたい場合は、 https://github.com/stolostron/policy-collection[Policy Repo] にアクセスしてください。
+
+以上で演習は終了です。
