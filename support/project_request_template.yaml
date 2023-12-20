@@ -21,7 +21,7 @@ objects:
     name: ${PROJECT_NAME}-quota
   spec:
     hard:
-      pods: 10
+      pods: 5
       requests.cpu: 4000m
       requests.memory: 8Gi
       resourcequotas: 1
